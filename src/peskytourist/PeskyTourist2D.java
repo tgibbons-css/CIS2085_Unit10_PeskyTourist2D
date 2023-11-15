@@ -13,19 +13,54 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class PeskyTourist {
+public class PeskyTourist2D {
 
     public final static String IMAGE = "Statue";
     //public final static String IMAGE = "TowerHall";
 
-    public static int[] createMedianArray(int[] array1, int[] array2, int[] array3) {
+    public static int width = 0;        // The width of the image
+    public static int height = 0;       // the height of the image in pixels
+
+    public static int[][] createMedian2D(int[][] array1, int[][] array2, int[][] array3) {
+        // Create new array for storing median values (for the new image).
+        int[][] newArray = new int[width][height];
+
+        // For each index, find the median value of the three images: array1, array2 and array3
+        // Store the median in the new array.
+        // Return the new array.
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int num1 = array1[x][y];
+                int num2 = array2[x][y];
+                int num3 = array3[x][y];
+                if (num2 < num1 && num1 < num3) {
+                    //   num2 < num1 < num3
+                    newArray[x][y] = num1;
+                } else if (num3 <= num1 && num1 <= num2) {
+                    //   num3 < num1 < num2
+                    newArray[x][y] = num1;
+                } else if (num1 <= num2 && num2 <= num3) {
+                    //   num1 < num2 < num3
+                    newArray[x][y] = num2;
+                } else if (num3 <= num2 && num2 <= num1) {
+                    //   num3 < num2 < num1
+                    newArray[x][y] = num2;
+                } else {
+                    newArray[x][y] = num3;
+                }
+            }
+        }
+        return newArray;                  // Change this to return your new array
+    }
+
+    public static int[][] createMedian3D(int[][][] imageLayers) {
         // Create new array for storing median values (for the new image).
 
+        int[][] newArray = new int[width][height];
         // For each index, find the average value of the three images: array1, array2 and array3
         // Store the average in the new array.
-        
         // Return the new array.
-        return array1;                  // Change this to return your new array
+        return newArray;                  // Change this to return your new array
 
     }
 
@@ -42,18 +77,18 @@ public class PeskyTourist {
         //displayImage(file3, "Image 3");
 
         // Convert the images into arrays of ints.
-        int[] imageArray1 = createIntegerArray(image1);
-        int[] imageArray2 = createIntegerArray(image2);
-        int[] imageArray3 = createIntegerArray(image3);
+        int[][] imageArray1 = create2DArray(image1);
+        int[][] imageArray2 = create2DArray(image2);
+        int[][] imageArray3 = create2DArray(image3);
 
         // Create median array.
-        int[] newImageArray = createMedianArray(imageArray1, imageArray2, imageArray3);
+        int[][] newImageArray = createMedian2D(imageArray1, imageArray2, imageArray3);
 
         // Create new BufferedImage for final result.  Start with first image as a starting point.
         BufferedImage newImage = ImageIO.read(new File(IMAGE + "1.png"));
 
         // Convert RGB array into a 2D array of Colors.
-        Color[][] colorArray = createColorArray2(newImageArray, newImage.getHeight(), newImage.getWidth());
+        Color[][] colorArray = createColor2DArray(newImageArray);
 
         // Update new image with final pixel values.
         updatePixels(newImage, colorArray);
@@ -77,22 +112,23 @@ public class PeskyTourist {
         }
     }
 
-    public static Color[][] createColorArray(int[] rgbArray, int height, int width) {
+    public static Color[][] createColor2DArray(int[][] integerArray) {
         Color[][] colorArray = new Color[height][width];
         int index = 0;
+        int integerValue;
         int red;
         int green;
         int blue;
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                red = rgbArray[index];
+                integerValue = integerArray[x][y];
+                red = integerValue / 1000000;
+                integerValue = integerValue % 1000000;
+                green = integerValue / 1000;
+                integerValue = integerValue % 1000;
+                blue = integerValue;
                 index++;
-                green = rgbArray[index];
-                index++;
-                blue = rgbArray[index];
-                index++;
-
                 colorArray[y][x] = new Color(red, green, blue);
             }
         }
@@ -100,7 +136,7 @@ public class PeskyTourist {
         return colorArray;
     }
 
-    public static Color[][] createColorArray2(int[] integerArray, int height, int width) {
+    public static Color[][] createColorArray(int[] integerArray, int height, int width) {
         Color[][] colorArray = new Color[height][width];
         int index = 0;
         int integerValue;
@@ -151,6 +187,26 @@ public class PeskyTourist {
         return rgbArray;
     }
 
+    // Create a 2D version of the array
+    public static int[][] create2DArray(BufferedImage image) {
+        height = image.getHeight();
+        width = image.getWidth();
+
+        Color pixel;
+        int[][] integerArray = new int[width][height];
+        int integerValue;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pixel = new Color(image.getRGB(x, y));
+                integerValue = pixel.getRed() * 1000000 + pixel.getGreen() * 1000 + pixel.getBlue();
+                integerArray[x][y] = integerValue;
+            }
+        }
+
+        return integerArray;
+    }
+
     public static int[] createIntegerArray(BufferedImage image) {
         int height = image.getHeight();
         int width = image.getWidth();
@@ -174,8 +230,9 @@ public class PeskyTourist {
 
     /**
      * Display an image in a dialog popup window with a given title
+     *
      * @param imgFile
-     * @param title 
+     * @param title
      */
     public static void displayImage(File imgFile, String title) {
         BufferedImage image;
