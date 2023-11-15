@@ -55,10 +55,31 @@ public class PeskyTourist2D {
 
     public static int[][] createMedian3D(int[][][] imageLayers) {
         // Create new array for storing median values (for the new image).
-
         int[][] newArray = new int[width][height];
-        // For each index, find the average value of the three images: array1, array2 and array3
-        // Store the average in the new array.
+        // For each index, find the median value of the three images: array1, array2 and array3
+        // Store the median in the new array.
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int num1 = imageLayers[0][x][y];
+                int num2 = imageLayers[1][x][y];
+                int num3 = imageLayers[2][x][y];
+                if (num2 < num1 && num1 < num3) {
+                    //   num2 < num1 < num3
+                    newArray[x][y] = num1;
+                } else if (num3 <= num1 && num1 <= num2) {
+                    //   num3 < num1 < num2
+                    newArray[x][y] = num1;
+                } else if (num1 <= num2 && num2 <= num3) {
+                    //   num1 < num2 < num3
+                    newArray[x][y] = num2;
+                } else if (num3 <= num2 && num2 <= num1) {
+                    //   num3 < num2 < num1
+                    newArray[x][y] = num2;
+                } else {
+                    newArray[x][y] = num3;
+                }
+            }
+        }
         // Return the new array.
         return newArray;                  // Change this to return your new array
 
@@ -80,15 +101,21 @@ public class PeskyTourist2D {
         int[][] imageArray1 = create2DArray(image1);
         int[][] imageArray2 = create2DArray(image2);
         int[][] imageArray3 = create2DArray(image3);
+        
+        int[][][] imageArray3D = {imageArray1, imageArray2, imageArray3};
 
-        // Create median array.
-        int[][] newImageArray = createMedian2D(imageArray1, imageArray2, imageArray3);
-
+        // Create median array with three 2D arrays
+        int[][] newImageArray2 = createMedian2D(imageArray1, imageArray2, imageArray3);
+        // Create median array with three 2D arrays
+        int[][] newImageArray3 = createMedian3D(imageArray3D);
+       
         // Create new BufferedImage for final result.  Start with first image as a starting point.
         BufferedImage newImage = ImageIO.read(new File(IMAGE + "1.png"));
 
         // Convert RGB array into a 2D array of Colors.
-        Color[][] colorArray = createColor2DArray(newImageArray);
+        //Color[][] colorArray = createColor2DArray(newImageArray2);
+        Color[][] colorArray = createColor2DArray(newImageArray3);
+
 
         // Update new image with final pixel values.
         updatePixels(newImage, colorArray);
